@@ -1,0 +1,636 @@
+{
+  "Nontronite": {
+    "class_id": 1,
+    "group": "Phyllosilicate",
+    "subgroup": "Fe_Mg_phyllo",
+    "formula": "Na0.3Fe2(Si,Al)4O10(OH)2·nH2O",
+    "mohs_hardness": "1-2",
+    "crystal_system": "Monoclinic",
+    "diagnostic_bands_um": [1.41, 1.92, 2.29, 2.40],
+    "band_assignments": {
+      "1.41": "OH stretch overtone (2v_OH)",
+      "1.92": "H2O combination (v_OH + delta_H2O)",
+      "2.29": "Fe3+-OH stretch + bend combination",
+      "2.40": "Fe3+-OH combination overtone"
+    },
+    "distinguish_from": {
+      "Saponite": "Nontronite 2.29um Fe-OH vs Saponite 2.31-2.32um Mg-OH; nontronite shows stronger 1.43um feature",
+      "Fe smectite": "Nontronite has sharper, deeper 2.29um band; Fe smectite is broader and shallower",
+      "Montmorillonite": "Nontronite 2.29um Fe-OH vs Montmorillonite 2.21um Al-OH"
+    },
+    "crism_params": ["BD1900_R2", "D2300", "BD2290"],
+    "mars_context": "Abundant in Nili Fossae, Mawrth Vallis; indicates aqueous alteration of basaltic materials",
+    "spectral_description": "Strong absorptions at 1.4 and 1.9um from structural water, with diagnostic Fe3+-OH band at 2.29um. Continuum-removed spectrum shows deep, narrow 2.29um feature distinguishing it from Mg-bearing smectites."
+  },
+  "Fe smectite": {
+    "class_id": 2,
+    "group": "Phyllosilicate",
+    "subgroup": "Fe_Mg_phyllo",
+    "formula": "(Fe)2-3(Si,Al)4O10(OH)2·nH2O",
+    "mohs_hardness": "1-2",
+    "crystal_system": "Monoclinic",
+    "diagnostic_bands_um": [1.41, 1.91, 2.28, 2.39],
+    "band_assignments": {
+      "1.41": "OH stretch overtone",
+      "1.91": "H2O combination",
+      "2.28": "Fe-OH stretch + bend combination (broader than nontronite)",
+      "2.39": "Fe-OH combination"
+    },
+    "distinguish_from": {
+      "Nontronite": "Fe smectite has broader, shallower 2.28um band vs sharp 2.29um in nontronite",
+      "Fe/Mg smectite": "Fe smectite lacks distinct Mg-OH shoulder near 2.32um"
+    },
+    "crism_params": ["BD1900_R2", "D2300", "BD2290"],
+    "mars_context": "Widespread in Noachian terrains; forms from low-temperature aqueous alteration",
+    "spectral_description": "Similar to nontronite but with broader Fe-OH absorption near 2.28um. Water features at 1.4 and 1.9um present. Less crystalline than nontronite."
+  },
+  "Saponite": {
+    "class_id": 3,
+    "group": "Phyllosilicate",
+    "subgroup": "Fe_Mg_phyllo",
+    "formula": "Ca0.25(Mg,Fe)3(Si,Al)4O10(OH)2·nH2O",
+    "mohs_hardness": "1-2",
+    "crystal_system": "Monoclinic",
+    "diagnostic_bands_um": [1.39, 1.91, 2.31, 2.39],
+    "band_assignments": {
+      "1.39": "OH stretch overtone (Mg-OH shifts to shorter wavelength)",
+      "1.91": "H2O combination",
+      "2.31": "Mg-OH stretch + bend combination",
+      "2.39": "Mg-OH combination overtone"
+    },
+    "distinguish_from": {
+      "Nontronite": "Saponite 2.31um Mg-OH vs Nontronite 2.29um Fe-OH; ~20nm shift is diagnostic",
+      "Serpentine": "Saponite has 1.9um H2O band; serpentine lacks or has weak 1.9um",
+      "Vermiculite": "Very similar spectrally; saponite has slightly sharper 2.31um"
+    },
+    "crism_params": ["BD1900_R2", "D2300", "BD2310"],
+    "mars_context": "Found in association with olivine-bearing terrains; indicates aqueous alteration of Mg-rich rocks",
+    "spectral_description": "Mg-OH absorption at 2.31um distinguishes from Fe-bearing smectites. 1.4 and 1.9um water features present. The ~20nm shift from 2.29 to 2.31um is the key Fe vs Mg smectite discriminator."
+  },
+  "Montmorillonite": {
+    "class_id": 4,
+    "group": "Phyllosilicate",
+    "subgroup": "Al_phyllo",
+    "formula": "(Na,Ca)0.33(Al,Mg)2Si4O10(OH)2·nH2O",
+    "mohs_hardness": "1-2",
+    "crystal_system": "Monoclinic",
+    "diagnostic_bands_um": [1.41, 1.91, 2.21, 2.35],
+    "band_assignments": {
+      "1.41": "OH stretch overtone",
+      "1.91": "H2O combination",
+      "2.21": "Al-OH stretch + bend combination",
+      "2.35": "Weak Al-OH + Si-O combination"
+    },
+    "distinguish_from": {
+      "Kaolinite": "Montmorillonite single 2.21um band vs kaolinite doublet at 2.16+2.21um",
+      "Al smectite": "Very similar; montmorillonite may show stronger 1.9um",
+      "Nontronite": "Al-OH 2.21um vs Fe-OH 2.29um"
+    },
+    "crism_params": ["BD1900_R2", "BD2210_2", "MIN2200"],
+    "mars_context": "Detected in Mawrth Vallis layered deposits; suggests prolonged water interaction",
+    "spectral_description": "Characterized by Al-OH absorption at 2.21um. Distinguishable from kaolinite by single absorption vs doublet. Strong water features at 1.4 and 1.9um indicate hydrated structure."
+  },
+  "Vermiculite": {
+    "class_id": 6,
+    "group": "Phyllosilicate",
+    "subgroup": "Fe_Mg_phyllo",
+    "formula": "(Mg,Fe,Al)3(Si,Al)4O10(OH)2·4H2O",
+    "mohs_hardness": "1.5",
+    "crystal_system": "Monoclinic",
+    "diagnostic_bands_um": [1.40, 1.91, 2.32, 2.39],
+    "band_assignments": {
+      "1.40": "OH stretch overtone",
+      "1.91": "H2O combination",
+      "2.32": "Mg-OH combination (slightly shifted from saponite)",
+      "2.39": "Metal-OH combination"
+    },
+    "distinguish_from": {
+      "Saponite": "Very similar spectrally; vermiculite may have broader 2.3um feature and stronger interlayer water bands"
+    },
+    "crism_params": ["BD1900_R2", "D2300"],
+    "mars_context": "Rare detection; possible weathering product of mafic minerals",
+    "spectral_description": "Mg-bearing phyllosilicate with 2.32um absorption. Spectrally very similar to saponite but may show broader features due to variable interlayer cation composition."
+  },
+  "Fe/Mg smectite": {
+    "class_id": 7,
+    "group": "Phyllosilicate",
+    "subgroup": "Fe_Mg_phyllo",
+    "formula": "(Fe,Mg)2-3(Si,Al)4O10(OH)2·nH2O",
+    "mohs_hardness": "1-2",
+    "crystal_system": "Monoclinic",
+    "diagnostic_bands_um": [1.41, 1.92, 2.30, 2.39],
+    "band_assignments": {
+      "1.41": "OH stretch overtone",
+      "1.92": "H2O combination",
+      "2.30": "Mixed Fe-OH and Mg-OH (intermediate between 2.29 and 2.31)",
+      "2.39": "Metal-OH combination"
+    },
+    "distinguish_from": {
+      "Nontronite": "Fe/Mg smectite 2.30um is intermediate vs pure Fe 2.29um",
+      "Saponite": "Fe/Mg smectite 2.30um is intermediate vs pure Mg 2.31um"
+    },
+    "crism_params": ["BD1900_R2", "D2300"],
+    "mars_context": "Most common phyllosilicate detection on Mars; widespread in Noachian crust",
+    "spectral_description": "Shows Metal-OH absorption at intermediate position (~2.30um) between Fe-end (2.29) and Mg-end (2.31). Indicates mixed Fe/Mg composition in octahedral sites."
+  },
+  "Al smectite": {
+    "class_id": 8,
+    "group": "Phyllosilicate",
+    "subgroup": "Al_phyllo",
+    "formula": "Al2Si4O10(OH)2·nH2O",
+    "mohs_hardness": "1-2",
+    "crystal_system": "Monoclinic",
+    "diagnostic_bands_um": [1.41, 1.91, 2.20, 2.35],
+    "band_assignments": {
+      "1.41": "OH stretch overtone",
+      "1.91": "H2O combination",
+      "2.20": "Al-OH stretch + bend combination",
+      "2.35": "Weak combination band"
+    },
+    "distinguish_from": {
+      "Montmorillonite": "Nearly identical; generic Al smectite designation",
+      "Kaolinite": "Single 2.20um vs kaolinite doublet 2.16+2.21um"
+    },
+    "crism_params": ["BD2210_2", "MIN2200", "BD1900_R2"],
+    "mars_context": "Upper stratigraphic layers in Mawrth Vallis; suggests advanced weathering",
+    "spectral_description": "Al-OH bearing smectite with diagnostic 2.20um absorption. Distinguished from Fe/Mg smectites by absorption position (~100nm blueward shift)."
+  },
+  "Kaolinite": {
+    "class_id": 9,
+    "group": "Phyllosilicate",
+    "subgroup": "Al_phyllo",
+    "formula": "Al2Si2O5(OH)4",
+    "mohs_hardness": "2-2.5",
+    "crystal_system": "Triclinic",
+    "diagnostic_bands_um": [1.40, 1.91, 2.16, 2.21],
+    "band_assignments": {
+      "1.40": "OH stretch overtone",
+      "1.91": "H2O combination (weaker than smectites)",
+      "2.16": "Al-OH stretch + bend (inner OH)",
+      "2.21": "Al-OH stretch + bend (inner surface OH)"
+    },
+    "distinguish_from": {
+      "Montmorillonite": "Kaolinite has diagnostic doublet at 2.16+2.21um vs single band at 2.21um",
+      "Al smectite": "Doublet structure is key discriminator"
+    },
+    "crism_params": ["BD2210_2", "MIN2200", "BD2165"],
+    "mars_context": "Rare on Mars; found in Mawrth Vallis and some crater deposits; implies acidic leaching",
+    "spectral_description": "Unique doublet absorption at 2.16 and 2.21um from two distinct Al-OH environments (inner hydroxyl and inner surface hydroxyl). This doublet is the key diagnostic feature."
+  },
+  "Chlorite": {
+    "class_id": 10,
+    "group": "Phyllosilicate",
+    "subgroup": "Chlorite",
+    "formula": "(Mg,Fe)3(Si,Al)4O10(OH)2·(Mg,Fe)3(OH)6",
+    "mohs_hardness": "2-2.5",
+    "crystal_system": "Monoclinic",
+    "diagnostic_bands_um": [1.39, 2.25, 2.33, 2.39],
+    "band_assignments": {
+      "1.39": "OH stretch overtone",
+      "2.25": "Fe-OH / Mg-OH combination",
+      "2.33": "Mg-OH combination (brucite-like layer)",
+      "2.39": "Metal-OH combination"
+    },
+    "distinguish_from": {
+      "Saponite": "Chlorite has additional 2.25um feature and lacks strong 1.9um H2O band",
+      "Serpentine": "Similar 2.32-2.33um but chlorite has broader features and 2.25um shoulder"
+    },
+    "crism_params": ["D2300", "BD2250"],
+    "mars_context": "Found in Noachian terrains; associated with hydrothermal alteration",
+    "spectral_description": "Shows multiple Metal-OH absorptions. Distinguished from smectites by weaker or absent 1.9um H2O band and presence of 2.25um shoulder from brucite-like interlayer."
+  },
+  "Prehnite": {
+    "class_id": 11,
+    "group": "Phyllosilicate",
+    "subgroup": "Mica_Prehnite",
+    "formula": "Ca2Al2Si3O10(OH)2",
+    "mohs_hardness": "6-6.5",
+    "crystal_system": "Orthorhombic",
+    "diagnostic_bands_um": [1.48, 2.24, 2.35],
+    "band_assignments": {
+      "1.48": "OH stretch overtone (shifted from typical phyllosilicate 1.4um)",
+      "2.24": "Al-OH combination (distinct position from Al-smectite 2.21um)",
+      "2.35": "Ca-OH / Si-OH combination"
+    },
+    "distinguish_from": {
+      "Montmorillonite": "Prehnite 2.24um vs montmorillonite 2.21um; prehnite OH overtone at 1.48 not 1.41um",
+      "Al smectite": "Shifted OH overtone and different 2.2um position"
+    },
+    "crism_params": ["BD2210_2", "MIN2295_2480"],
+    "mars_context": "Nili Fossae region; indicates higher temperature alteration (>200C) than smectites",
+    "spectral_description": "Hydrated calcium aluminosilicate with shifted OH features. The 1.48um overtone (vs typical 1.41um) and 2.24um Al-OH position are diagnostic. Indicates hydrothermal alteration conditions."
+  },
+  "Kieserite": {
+    "class_id": 12,
+    "group": "Sulfate",
+    "subgroup": "Monohydrated",
+    "formula": "MgSO4·H2O",
+    "mohs_hardness": "3.5",
+    "crystal_system": "Monoclinic",
+    "diagnostic_bands_um": [2.07, 2.13, 2.40],
+    "band_assignments": {
+      "2.07": "H2O combination in monohydrated sulfate",
+      "2.13": "H2O overtone (shifted from polyhydrated 1.9um)",
+      "2.40": "SO4 combination overtone"
+    },
+    "distinguish_from": {
+      "Polyhydr. sulfate": "Kieserite 2.07-2.13um vs polyhydrated 1.93-1.97um (monohydrated shifts H2O band redward)",
+      "Gypsum": "Kieserite single shifted H2O vs gypsum sharp 1.94um + additional bands"
+    },
+    "crism_params": ["BD2100_2", "SINDEX2"],
+    "mars_context": "Valles Marineris ILDs (Interior Layered Deposits); formed by evaporation of sulfate-rich brines",
+    "spectral_description": "Monohydrated Mg-sulfate distinguished by redshifted water absorption at 2.07-2.13um instead of typical 1.9um. This shift is diagnostic of single structural water molecule."
+  },
+  "Gypsum": {
+    "class_id": 14,
+    "group": "Sulfate",
+    "subgroup": "Polyhydrated",
+    "formula": "CaSO4·2H2O",
+    "mohs_hardness": "2",
+    "crystal_system": "Monoclinic",
+    "diagnostic_bands_um": [1.45, 1.75, 1.94, 2.22, 2.48],
+    "band_assignments": {
+      "1.45": "OH stretch overtone",
+      "1.75": "Gypsum-specific H2O combination",
+      "1.94": "H2O combination (sharp)",
+      "2.22": "Unique gypsum triplet feature",
+      "2.48": "SO4 combination"
+    },
+    "distinguish_from": {
+      "Bassanite": "Gypsum has 1.75um band and triplet at 2.2um; bassanite is broader/shifted",
+      "Polyhydr. sulfate": "Gypsum has distinctive triplet and 1.75um not seen in generic polyhydrated sulfates"
+    },
+    "crism_params": ["BD1900_R2", "BD2100_2", "SINDEX2"],
+    "mars_context": "North polar dunes, some equatorial deposits; indicates evaporite deposition",
+    "spectral_description": "Rich spectral signature with multiple diagnostic features. The 1.75um band and 2.2um triplet are unique to gypsum among sulfates. Five distinct absorption bands make it one of the most spectrally distinctive minerals."
+  },
+  "Bassanite": {
+    "class_id": 15,
+    "group": "Sulfate",
+    "subgroup": "Polyhydrated",
+    "formula": "CaSO4·0.5H2O",
+    "mohs_hardness": "3",
+    "crystal_system": "Monoclinic",
+    "diagnostic_bands_um": [1.43, 1.94, 2.48],
+    "band_assignments": {
+      "1.43": "OH stretch overtone",
+      "1.94": "H2O combination (similar to gypsum but less structured)",
+      "2.48": "SO4 combination"
+    },
+    "distinguish_from": {
+      "Gypsum": "Bassanite lacks 1.75um band and 2.2um triplet seen in gypsum; fewer water features due to hemihydrate nature"
+    },
+    "crism_params": ["BD1900_R2", "SINDEX2"],
+    "mars_context": "Proposed in some Valles Marineris deposits; intermediate dehydration product",
+    "spectral_description": "Hemihydrate calcium sulfate with fewer water absorption features than gypsum. Lacks the diagnostic 1.75um and 2.2um triplet of gypsum."
+  },
+  "Magnesite": {
+    "class_id": 16,
+    "group": "Carbonate",
+    "subgroup": "Mg_Ca_carbonate",
+    "formula": "MgCO3",
+    "mohs_hardness": "3.5-4.5",
+    "crystal_system": "Trigonal",
+    "diagnostic_bands_um": [2.30, 2.50, 3.40, 3.48],
+    "band_assignments": {
+      "2.30": "CO3 combination overtone (v1+v3)",
+      "2.50": "CO3 combination (3v3)",
+      "3.40": "CO3 v3 antisymmetric stretch overtone",
+      "3.48": "CO3 v1+v4 combination"
+    },
+    "distinguish_from": {
+      "Calcite": "Magnesite 2.30+2.50um vs calcite 2.34+2.53um (Mg vs Ca shifts bands to shorter wavelengths)",
+      "Fe/Mg smectite": "Carbonate lacks 1.9um H2O band; has 3.4um CO3 feature"
+    },
+    "crism_params": ["MIN2295_2480", "BD2500_2"],
+    "mars_context": "Nili Fossae; suggests carbonate formation from CO2-rich fluids or atmosphere",
+    "spectral_description": "Diagnostic CO3 absorptions at 2.30 and 2.50um, with additional features at 3.4-3.5um. Shorter wavelength position than calcite due to lighter Mg cation. Lacks water features."
+  },
+  "Calcite": {
+    "class_id": 17,
+    "group": "Carbonate",
+    "subgroup": "Mg_Ca_carbonate",
+    "formula": "CaCO3",
+    "mohs_hardness": "3",
+    "crystal_system": "Trigonal",
+    "diagnostic_bands_um": [2.34, 2.53, 3.42, 3.50],
+    "band_assignments": {
+      "2.34": "CO3 combination overtone (v1+v3)",
+      "2.53": "CO3 combination (3v3)",
+      "3.42": "CO3 v3 antisymmetric stretch overtone",
+      "3.50": "CO3 v1+v4 combination"
+    },
+    "distinguish_from": {
+      "Magnesite": "Calcite bands shifted ~40nm redward (2.34 vs 2.30, 2.53 vs 2.50) due to heavier Ca cation"
+    },
+    "crism_params": ["MIN2295_2480", "BD2500_2"],
+    "mars_context": "Rare surface detection; found mixed with other phases in some craters",
+    "spectral_description": "CO3 absorptions at redder positions than magnesite. The Ca cation mass shifts vibrational frequencies to longer wavelengths. Key bands at 2.34 and 2.53um."
+  },
+  "Hematite": {
+    "class_id": 18,
+    "group": "Oxide",
+    "subgroup": "Fe_oxide",
+    "formula": "Fe2O3",
+    "mohs_hardness": "5.5-6.5",
+    "crystal_system": "Trigonal",
+    "diagnostic_bands_um": [0.86, 1.05],
+    "ir_features_um": [1.8, 2.4],
+    "band_assignments": {
+      "0.86": "Fe3+ crystal field transition (6A1->4T1)",
+      "1.05": "Fe3+ crystal field transition (pair excitation)",
+      "1.8": "Weak overtone feature in IR",
+      "2.4": "Broad Fe-O combination"
+    },
+    "distinguish_from": {
+      "Goethite": "Hematite 0.86um band vs goethite 0.90-0.93um; hematite lacks 3um OH band"
+    },
+    "crism_params": ["BD530_2", "BD860_2", "BD920_2"],
+    "mars_context": "Meridiani Planum (Opportunity landing site); forms by dehydration of goethite or direct precipitation",
+    "spectral_description": "Iron oxide characterized by crystal field absorptions in VNIR. In the IR range (1.0-3.9um used in CRISM), features are subtle broad absorptions. Primarily identified by steep red slope and weak broad features."
+  },
+  "Goethite": {
+    "class_id": 19,
+    "group": "Oxide",
+    "subgroup": "Fe_oxide",
+    "formula": "FeO(OH)",
+    "mohs_hardness": "5-5.5",
+    "crystal_system": "Orthorhombic",
+    "diagnostic_bands_um": [0.90, 1.05, 3.00],
+    "band_assignments": {
+      "0.90": "Fe3+ crystal field transition (shifted from hematite 0.86)",
+      "1.05": "Fe3+ pair excitation",
+      "3.00": "OH stretching fundamental"
+    },
+    "distinguish_from": {
+      "Hematite": "Goethite 0.90um vs hematite 0.86um; goethite has 3.0um OH band"
+    },
+    "crism_params": ["BD530_2", "BD920_2"],
+    "mars_context": "Less common than hematite; indicates wetter formation conditions",
+    "spectral_description": "Iron oxyhydroxide with shifted crystal field band at 0.90um and diagnostic OH fundamental at 3.0um. Presence of OH distinguishes from anhydrous hematite."
+  },
+  "LCP": {
+    "class_id": 20,
+    "group": "Pyroxene_Olivine",
+    "subgroup": "LCP_HCP",
+    "formula": "(Mg,Fe)SiO3",
+    "mohs_hardness": "5-6",
+    "crystal_system": "Orthorhombic",
+    "diagnostic_bands_um": [1.05, 1.83],
+    "band_assignments": {
+      "1.05": "Fe2+ crystal field (M2 site) - Band I",
+      "1.83": "Fe2+ crystal field (M1 site) - Band II (shorter than HCP)"
+    },
+    "distinguish_from": {
+      "HCP": "LCP Band II at 1.83um vs HCP Band II at 2.15um; the ~300nm shift is diagnostic of Ca content",
+      "Olivine": "Pyroxene has two distinct bands; olivine has broad single complex near 1.05um"
+    },
+    "crism_params": ["LCPINDEX2", "BD1900_R2"],
+    "mars_context": "Noachian highlands crust; primitive igneous rock composition",
+    "spectral_description": "Low-calcium pyroxene (orthopyroxene/pigeonite) with two Fe2+ crystal field bands. Band II at 1.83um is shorter wavelength than HCP, reflecting lower Ca content in M2 crystallographic site."
+  },
+  "HCP": {
+    "class_id": 21,
+    "group": "Pyroxene_Olivine",
+    "subgroup": "LCP_HCP",
+    "formula": "Ca(Mg,Fe)Si2O6",
+    "mohs_hardness": "5-6",
+    "crystal_system": "Monoclinic",
+    "diagnostic_bands_um": [1.05, 2.15],
+    "band_assignments": {
+      "1.05": "Fe2+ crystal field (M2 site) - Band I",
+      "2.15": "Fe2+ crystal field (M1 site) - Band II (longer than LCP)"
+    },
+    "distinguish_from": {
+      "LCP": "HCP Band II at 2.15um vs LCP Band II at 1.83um",
+      "Fe/Mg smectite": "HCP 2.15um is broader and centered differently than smectite 2.30um Metal-OH"
+    },
+    "crism_params": ["HCPINDEX2"],
+    "mars_context": "Volcanic flows, Hesperian-aged plains; indicates more evolved magmatism",
+    "spectral_description": "High-calcium pyroxene (augite/diopside) with Band II shifted to 2.15um due to Ca in M2 site. The 300nm shift from LCP (1.83) to HCP (2.15) is the primary pyroxene classification criterion."
+  },
+  "Olivine": {
+    "class_id": 22,
+    "group": "Pyroxene_Olivine",
+    "subgroup": "Olivine",
+    "formula": "(Mg,Fe)2SiO4",
+    "mohs_hardness": "6.5-7",
+    "crystal_system": "Orthorhombic",
+    "diagnostic_bands_um": [1.05, 1.25],
+    "band_assignments": {
+      "1.05": "Fe2+ crystal field - broad complex absorption spanning 0.85-1.5um",
+      "1.25": "Fe2+ crystal field (M1 site contribution)"
+    },
+    "distinguish_from": {
+      "Pyroxene": "Olivine has single broad complex near 1um; pyroxene has two distinct bands at 1.0 and 1.8-2.2um",
+      "Olivine (Fo-rich)": "Fo-rich shifts band center to slightly shorter wavelength"
+    },
+    "crism_params": ["OLINDEX3"],
+    "mars_context": "Nili Fossae, Syrtis Major; indicates primitive mantle-derived rocks",
+    "spectral_description": "Broad, complex absorption centered near 1.05um spanning 0.85-1.5um from overlapping Fe2+ crystal field transitions in M1 and M2 sites. No discrete second band distinguishes from pyroxene."
+  },
+  "Mg carbonate": {
+    "class_id": 23,
+    "group": "Carbonate",
+    "subgroup": "Mg_Ca_carbonate",
+    "formula": "MgCO3 (or Mg-rich carbonate)",
+    "mohs_hardness": "3.5-4",
+    "crystal_system": "Trigonal",
+    "diagnostic_bands_um": [2.30, 2.50, 3.40],
+    "band_assignments": {
+      "2.30": "CO3 combination overtone",
+      "2.50": "CO3 combination",
+      "3.40": "CO3 v3 overtone"
+    },
+    "distinguish_from": {
+      "Magnesite": "Generic Mg-carbonate class; may include magnesite and Mg-rich dolomite",
+      "Fe/Mg smectite": "Carbonate 2.30+2.50 pair vs smectite 2.30 only; carbonate has 3.4um CO3"
+    },
+    "crism_params": ["MIN2295_2480", "BD2500_2"],
+    "mars_context": "Nili Fossae; significant for understanding early Mars CO2 cycle",
+    "spectral_description": "CO3-bearing phase with paired absorptions at 2.30 and 2.50um. Distinguished from phyllosilicates by absence of 1.9um H2O and presence of 3.4um CO3 band."
+  },
+  "CO2 ice": {
+    "class_id": 24,
+    "group": "Other",
+    "subgroup": "Ice",
+    "formula": "CO2(s)",
+    "diagnostic_bands_um": [1.44, 2.28, 2.35, 3.30],
+    "band_assignments": {
+      "1.44": "CO2 overtone",
+      "2.28": "CO2 combination band",
+      "2.35": "CO2 combination band",
+      "3.30": "CO2 v3 fundamental region"
+    },
+    "distinguish_from": {
+      "Phyllosilicate": "CO2 ice has sharp, narrow bands vs broader mineral OH absorptions; seasonal/polar distribution"
+    },
+    "crism_params": ["BD1435", "BD2355"],
+    "mars_context": "Polar caps and seasonal deposits; major volatile reservoir",
+    "spectral_description": "Sharp, narrow absorption features diagnostic of solid CO2. Seasonal appearance/disappearance in polar regions helps identify. Distinguished from minerals by narrow band widths and spatial/temporal context."
+  },
+  "Fe/Mg clay": {
+    "class_id": 25,
+    "group": "Phyllosilicate",
+    "subgroup": "Fe_Mg_phyllo",
+    "formula": "(Fe,Mg)-bearing phyllosilicate",
+    "diagnostic_bands_um": [1.41, 1.91, 2.30, 2.39],
+    "band_assignments": {
+      "1.41": "OH stretch overtone",
+      "1.91": "H2O combination",
+      "2.30": "Fe/Mg-OH combination",
+      "2.39": "Metal-OH combination"
+    },
+    "distinguish_from": {
+      "Fe/Mg smectite": "Generic clay designation when specific smectite type cannot be determined"
+    },
+    "crism_params": ["BD1900_R2", "D2300"],
+    "mars_context": "Widespread Noachian detection; general Fe/Mg phyllosilicate when subtype is uncertain",
+    "spectral_description": "Generic Fe/Mg-bearing phyllosilicate with typical 1.4, 1.9, and 2.3um absorptions but insufficient spectral detail to assign specific mineral name."
+  },
+  "Pyroxene": {
+    "class_id": 26,
+    "group": "Pyroxene_Olivine",
+    "subgroup": "LCP_HCP",
+    "formula": "(Ca,Mg,Fe)Si2O6",
+    "diagnostic_bands_um": [1.05, 1.9, 2.1],
+    "band_assignments": {
+      "1.05": "Fe2+ crystal field Band I",
+      "1.9": "Fe2+ crystal field Band II (intermediate position)",
+      "2.1": "Fe2+ crystal field Band II"
+    },
+    "distinguish_from": {
+      "LCP": "Generic pyroxene when LCP/HCP distinction unclear",
+      "HCP": "Band II position intermediate or ambiguous"
+    },
+    "crism_params": ["LCPINDEX2", "HCPINDEX2"],
+    "mars_context": "Ubiquitous in Martian basaltic crust",
+    "spectral_description": "Generic pyroxene classification when Band II position does not clearly distinguish LCP vs HCP."
+  },
+  "HCP (high-Ca)": {
+    "class_id": 27,
+    "group": "Pyroxene_Olivine",
+    "subgroup": "LCP_HCP",
+    "formula": "Ca(Mg,Fe)Si2O6 (high-Ca endmember)",
+    "diagnostic_bands_um": [1.05, 2.20],
+    "band_assignments": {
+      "1.05": "Fe2+ crystal field Band I",
+      "2.20": "Fe2+ crystal field Band II (further shifted by higher Ca)"
+    },
+    "distinguish_from": {
+      "HCP": "High-Ca variant has Band II shifted further to ~2.20um (vs standard HCP 2.15um)"
+    },
+    "crism_params": ["HCPINDEX2"],
+    "mars_context": "Evolved volcanic products",
+    "spectral_description": "High-Ca pyroxene endmember with Band II shifted to ~2.20um, further than standard HCP, reflecting maximum Ca content in the pyroxene structure."
+  },
+  "Zeolite": {
+    "class_id": 28,
+    "group": "Other",
+    "subgroup": "Zeolite",
+    "formula": "Microporous aluminosilicate (e.g., analcime NaAlSi2O6·H2O)",
+    "mohs_hardness": "5-5.5",
+    "crystal_system": "Variable",
+    "diagnostic_bands_um": [1.42, 1.91, 2.50],
+    "band_assignments": {
+      "1.42": "OH/H2O overtone",
+      "1.91": "H2O combination",
+      "2.50": "Si-O / framework vibration combination"
+    },
+    "distinguish_from": {
+      "Phyllosilicate": "Zeolite has similar 1.4+1.9um water bands but different 2.2-2.5um region; lacks Metal-OH absorption"
+    },
+    "crism_params": ["BD1900_R2"],
+    "mars_context": "Possible detection in some altered terrains; indicates low-grade metamorphism",
+    "spectral_description": "Hydrated aluminosilicate framework mineral. Water features at 1.4+1.9um similar to phyllosilicates, but lacks diagnostic Metal-OH bands in 2.2-2.35um region."
+  },
+  "Sulfate mix": {
+    "class_id": 29,
+    "group": "Sulfate",
+    "subgroup": "Polyhydrated",
+    "formula": "Mixed sulfate phases",
+    "diagnostic_bands_um": [1.44, 1.93, 2.40],
+    "band_assignments": {
+      "1.44": "OH/H2O overtone",
+      "1.93": "H2O combination (polyhydrated position)",
+      "2.40": "SO4 combination"
+    },
+    "distinguish_from": {
+      "Gypsum": "Sulfate mix lacks gypsum-specific 1.75um and 2.2um triplet",
+      "Kieserite": "Sulfate mix at 1.93um vs kieserite shifted to 2.07-2.13um"
+    },
+    "crism_params": ["BD1900_R2", "SINDEX2"],
+    "mars_context": "Valles Marineris; complex sulfate deposits with multiple phases",
+    "spectral_description": "Generic polyhydrated sulfate when specific mineral (gypsum, epsomite, etc.) cannot be determined. Characterized by 1.93um H2O band at polyhydrated position."
+  },
+  "Serpentine": {
+    "class_id": 30,
+    "group": "Phyllosilicate",
+    "subgroup": "Serpentine",
+    "formula": "Mg3Si2O5(OH)4",
+    "mohs_hardness": "2.5-3.5",
+    "crystal_system": "Monoclinic",
+    "diagnostic_bands_um": [1.39, 2.11, 2.32, 2.51],
+    "band_assignments": {
+      "1.39": "OH stretch overtone (Mg-OH)",
+      "2.11": "Mg-OH combination (unique to serpentine)",
+      "2.32": "Mg-OH stretch + bend",
+      "2.51": "Mg-OH combination"
+    },
+    "distinguish_from": {
+      "Saponite": "Serpentine has weak/absent 1.9um H2O and unique 2.11um band; saponite has strong 1.9um",
+      "Chlorite": "Serpentine lacks chlorite's 2.25um shoulder"
+    },
+    "crism_params": ["D2300", "BD2310"],
+    "mars_context": "Nili Fossae; formed by serpentinization of olivine-rich rocks with water",
+    "spectral_description": "Mg-rich phyllosilicate with diagnostic 2.11um band unique among phyllosilicates. Weak or absent 1.9um H2O band distinguishes from hydrated smectites. Formed by hydration of olivine."
+  },
+  "Pyroxene (low-Ca)": {
+    "class_id": 31,
+    "group": "Pyroxene_Olivine",
+    "subgroup": "LCP_HCP",
+    "formula": "(Mg,Fe)SiO3 (enstatite/pigeonite)",
+    "diagnostic_bands_um": [1.05, 1.83],
+    "band_assignments": {
+      "1.05": "Fe2+ crystal field Band I",
+      "1.83": "Fe2+ crystal field Band II"
+    },
+    "distinguish_from": {
+      "LCP": "Equivalent to LCP class; low-Ca pyroxene alternate designation"
+    },
+    "crism_params": ["LCPINDEX2"],
+    "mars_context": "Noachian crust",
+    "spectral_description": "Same as LCP class. Low-calcium pyroxene with Band II at ~1.83um."
+  },
+  "Olivine (Fo-rich)": {
+    "class_id": 38,
+    "group": "Pyroxene_Olivine",
+    "subgroup": "Olivine",
+    "formula": "Mg2SiO4 (forsterite-rich)",
+    "mohs_hardness": "6.5-7",
+    "crystal_system": "Orthorhombic",
+    "diagnostic_bands_um": [1.02, 1.20],
+    "band_assignments": {
+      "1.02": "Fe2+ crystal field (shifted shorter by higher Mg/Fe ratio)",
+      "1.20": "Fe2+ M1 site contribution"
+    },
+    "distinguish_from": {
+      "Olivine": "Fo-rich has band center shifted to shorter wavelength (~1.02 vs ~1.05um) due to less Fe"
+    },
+    "crism_params": ["OLINDEX3"],
+    "mars_context": "Nili Fossae; mantle-derived, primitive composition",
+    "spectral_description": "Forsterite-rich olivine with band center shifted to shorter wavelength than Fe-rich olivine. Higher Mg/Fe ratio reduces Fe2+ absorption intensity and shifts band center blueward."
+  },
+  "Water-unrelated": {
+    "class_id": 100,
+    "group": "Other",
+    "subgroup": "Unclassified",
+    "formula": "N/A",
+    "diagnostic_bands_um": [],
+    "band_assignments": {},
+    "distinguish_from": {},
+    "crism_params": [],
+    "mars_context": "Background material lacking diagnostic water-related mineral absorptions",
+    "spectral_description": "No diagnostic absorption features related to water-bearing or hydroxyl-bearing minerals. May represent dust, unaltered basalt, or spectrally bland surfaces."
+  }
+}

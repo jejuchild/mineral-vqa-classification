@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.npz
+data/spectral_images/
+models/vqa_lora/
+model/
+som_results/
+som_results_mat/
+results_v2/
+*.pt
+*.bin
+*.safetensors
+.DS_Store

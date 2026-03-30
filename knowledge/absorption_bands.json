@@ -1,0 +1,222 @@
+{
+  "_meta": {
+    "description": "Absorption band catalog for CRISM spectral range (1.0-3.9um). Sources: Clark et al. 1990, Viviano-Beck et al. 2014, Bishop et al. 2008, USGS splib07.",
+    "wavelength_unit": "micrometers",
+    "applicable_range": "1.02-3.92um (CRISM IR detector, 350 bands)"
+  },
+  "molecular_vibrations": {
+    "OH_stretch_overtone": {
+      "wavelength_range": [1.38, 1.48],
+      "typical_center": 1.41,
+      "cause": "First overtone of OH stretching vibration (2v_OH)",
+      "minerals": ["All phyllosilicates", "Sulfates", "Oxyhydroxides"],
+      "notes": "Position shifts with cation: Mg-OH ~1.39um, Al-OH ~1.41um, Prehnite ~1.48um"
+    },
+    "H2O_combination": {
+      "wavelength_range": [1.88, 1.97],
+      "typical_center": 1.91,
+      "cause": "Combination of H2O bending + OH stretch (v2+v3)",
+      "minerals": ["Smectites", "Polyhydrated sulfates", "Zeolites"],
+      "notes": "Absent or very weak in anhydrous minerals (olivine, pyroxene, hematite). Key hydration indicator."
+    },
+    "H2O_monohydrated_shifted": {
+      "wavelength_range": [2.05, 2.15],
+      "typical_center": 2.10,
+      "cause": "H2O combination shifted by crystal structure with single structural water",
+      "minerals": ["Kieserite", "Monohydrated sulfates"],
+      "notes": "Diagnostic shift from 1.9um polyhydrated to 2.1um monohydrated position"
+    },
+    "Al_OH_combination": {
+      "wavelength_range": [2.16, 2.23],
+      "typical_center": 2.21,
+      "cause": "Al-OH stretch + bend combination",
+      "minerals": ["Kaolinite (doublet 2.16+2.21)", "Montmorillonite (2.21)", "Al smectite (2.20)", "Prehnite (2.24)"],
+      "notes": "Kaolinite uniquely shows doublet; others show single band. Position distinguishes Al-phyllosilicates from Fe/Mg-phyllosilicates."
+    },
+    "Fe_OH_combination": {
+      "wavelength_range": [2.27, 2.30],
+      "typical_center": 2.29,
+      "cause": "Fe3+-OH stretch + bend combination",
+      "minerals": ["Nontronite (2.29)", "Fe smectite (2.28)"],
+      "notes": "Key discriminator between Fe and Mg smectites. ~20nm shift from Mg-OH."
+    },
+    "Mg_OH_combination": {
+      "wavelength_range": [2.30, 2.33],
+      "typical_center": 2.31,
+      "cause": "Mg-OH stretch + bend combination",
+      "minerals": ["Saponite (2.31)", "Serpentine (2.32)", "Chlorite (2.33)", "Vermiculite (2.32)"],
+      "notes": "Shifted redward from Fe-OH by ~20nm due to heavier Mg-O bond."
+    },
+    "Metal_OH_overtone": {
+      "wavelength_range": [2.35, 2.42],
+      "typical_center": 2.39,
+      "cause": "Higher-order Metal-OH combination bands",
+      "minerals": ["Most phyllosilicates", "Some sulfates"],
+      "notes": "Less diagnostic alone but confirms phyllosilicate presence when paired with 2.2-2.3um bands."
+    },
+    "CO3_combination_1": {
+      "wavelength_range": [2.28, 2.35],
+      "typical_center": 2.32,
+      "cause": "CO3 combination overtone (v1+v3)",
+      "minerals": ["Magnesite (2.30)", "Calcite (2.34)"],
+      "notes": "Overlaps with Mg-OH region. Must check for paired 2.5um band to confirm carbonate vs phyllosilicate."
+    },
+    "CO3_combination_2": {
+      "wavelength_range": [2.48, 2.55],
+      "typical_center": 2.50,
+      "cause": "CO3 combination (3v3 or v1+2v4)",
+      "minerals": ["Magnesite (2.50)", "Calcite (2.53)"],
+      "notes": "Paired with 2.3um CO3 band. Presence of BOTH 2.3+2.5um confirms carbonate; 2.3um alone could be phyllosilicate."
+    },
+    "H2O_fundamental": {
+      "wavelength_range": [2.70, 3.10],
+      "typical_center": 3.00,
+      "cause": "O-H stretching fundamental (v1, v3)",
+      "minerals": ["Water ice", "All hydrated minerals", "Goethite"],
+      "notes": "Very strong, broad absorption. Saturates in water ice. Diagnostic for goethite (vs anhydrous hematite)."
+    },
+    "CO3_v3_antisymmetric": {
+      "wavelength_range": [3.30, 3.55],
+      "typical_center": 3.42,
+      "cause": "CO3 antisymmetric stretching (v3) overtone",
+      "minerals": ["Magnesite (3.40)", "Calcite (3.42)", "CO2 ice (3.30)"],
+      "notes": "Strong carbonate indicator. Can confirm carbonate identification from 2.3+2.5um bands."
+    },
+    "Fe2_crystal_field_band1": {
+      "wavelength_range": [0.90, 1.10],
+      "typical_center": 1.05,
+      "cause": "Fe2+ electronic transition in M2 crystallographic site",
+      "minerals": ["Olivine (broad 0.85-1.5)", "Pyroxene (1.0-1.1)", "Olivine Fo-rich (1.02)"],
+      "notes": "Within CRISM IR range. Broad in olivine, narrower in pyroxene. Band I for pyroxene classification."
+    },
+    "Fe2_crystal_field_band2_LCP": {
+      "wavelength_range": [1.75, 1.95],
+      "typical_center": 1.83,
+      "cause": "Fe2+ electronic transition in M1 site (low-Ca pyroxene)",
+      "minerals": ["LCP / Orthopyroxene / Pigeonite"],
+      "notes": "Band II position is primary LCP vs HCP discriminator. LCP ~1.83um."
+    },
+    "Fe2_crystal_field_band2_HCP": {
+      "wavelength_range": [2.05, 2.25],
+      "typical_center": 2.15,
+      "cause": "Fe2+ electronic transition in M1 site (high-Ca pyroxene)",
+      "minerals": ["HCP / Augite / Diopside"],
+      "notes": "Band II position shifted redward by Ca in M2 site. HCP ~2.15um. ~300nm shift from LCP."
+    },
+    "Serpentine_unique": {
+      "wavelength_range": [2.08, 2.14],
+      "typical_center": 2.11,
+      "cause": "Mg-OH combination unique to serpentine structure",
+      "minerals": ["Serpentine"],
+      "notes": "Diagnostic band not seen in other Mg-phyllosilicates. Key discriminator from saponite."
+    },
+    "Gypsum_specific": {
+      "wavelength_range": [1.73, 1.78],
+      "typical_center": 1.75,
+      "cause": "H2O combination specific to gypsum crystal structure",
+      "minerals": ["Gypsum"],
+      "notes": "Unique to gypsum among sulfates. Not seen in bassanite, kieserite, or polyhydrated sulfates."
+    }
+  },
+  "spectral_parameters_viviano_beck": {
+    "_source": "Viviano-Beck et al. 2014, JGR Planets",
+    "BD1900_R2": {
+      "center_um": 1.93,
+      "shoulders_um": [1.857, 2.067],
+      "detects": "H2O-bearing minerals (phyllosilicates, polyhydrated sulfates)",
+      "high_value_means": "Strong 1.9um H2O absorption present"
+    },
+    "BD2100_2": {
+      "center_um": 2.132,
+      "shoulders_um": [1.93, 2.25],
+      "detects": "Monohydrated sulfates (kieserite)",
+      "high_value_means": "Shifted H2O band at ~2.1um indicating monohydrated phase"
+    },
+    "BD2210_2": {
+      "center_um": 2.21,
+      "shoulders_um": [2.165, 2.29],
+      "detects": "Al-OH minerals (kaolinite, montmorillonite, Al smectite)",
+      "high_value_means": "Al-OH combination absorption present"
+    },
+    "BD2290": {
+      "center_um": 2.29,
+      "shoulders_um": [2.21, 2.35],
+      "detects": "Fe-OH minerals (nontronite, Fe smectite)",
+      "high_value_means": "Fe-OH combination absorption at 2.29um"
+    },
+    "D2300": {
+      "center_um": 2.30,
+      "shoulders_um": [1.815, 2.53],
+      "detects": "Metal-OH phyllosilicates (Fe/Mg smectites, chlorite)",
+      "high_value_means": "Broad 2.3um drop indicating Metal-OH bearing phase"
+    },
+    "BD2310": {
+      "center_um": 2.31,
+      "shoulders_um": [2.25, 2.37],
+      "detects": "Mg-OH minerals (saponite, serpentine)",
+      "high_value_means": "Mg-OH combination absorption"
+    },
+    "SINDEX2": {
+      "center_um": 2.40,
+      "shoulders_um": [2.12, 2.29],
+      "detects": "Sulfate minerals",
+      "high_value_means": "Sulfate-related absorption (SO4 combination)"
+    },
+    "MIN2200": {
+      "center_um": [2.165, 2.21],
+      "detects": "Al-OH doublet (kaolinite) or single band (montmorillonite)",
+      "high_value_means": "Minimum at 2.16 or 2.21um from Al-OH"
+    },
+    "MIN2250": {
+      "center_um": [2.21, 2.265],
+      "detects": "Al-OH / Fe-OH transition region",
+      "high_value_means": "Absorption in 2.2-2.26um range"
+    },
+    "MIN2295_2480": {
+      "center_um": [2.295, 2.48],
+      "detects": "Carbonates (paired CO3 bands)",
+      "high_value_means": "Paired carbonate absorptions at 2.3 and 2.5um"
+    },
+    "BD2500_2": {
+      "center_um": 2.50,
+      "shoulders_um": [2.38, 2.57],
+      "detects": "Carbonates (second CO3 combination band)",
+      "high_value_means": "CO3 absorption at 2.5um confirming carbonate"
+    },
+    "LCPINDEX2": {
+      "center_um": 1.81,
+      "shoulders_um": [1.56, 2.45],
+      "detects": "Low-Ca pyroxene",
+      "high_value_means": "Band II near 1.8um = LCP-dominated pyroxene"
+    },
+    "HCPINDEX2": {
+      "center_um": 2.12,
+      "shoulders_um": [1.69, 2.53],
+      "detects": "High-Ca pyroxene",
+      "high_value_means": "Band II near 2.1-2.2um = HCP-dominated pyroxene"
+    },
+    "OLINDEX3": {
+      "center_um": 1.21,
+      "shoulders_um": [1.05, 1.86],
+      "detects": "Olivine",
+      "high_value_means": "Broad 1um complex absorption from Fe2+ in olivine"
+    },
+    "BD2165": {
+      "center_um": 2.165,
+      "shoulders_um": [2.12, 2.23],
+      "detects": "Kaolinite (short-wavelength component of doublet)",
+      "high_value_means": "2.165um Al-OH inner hydroxyl absorption (kaolinite diagnostic)"
+    }
+  },
+  "decision_rules": {
+    "phyllosilicate_vs_carbonate": "Both show ~2.3um absorption. Carbonate has paired 2.3+2.5um bands and 3.4um CO3 feature. Phyllosilicate has 1.9um H2O and lacks 2.5um paired band.",
+    "Fe_vs_Mg_smectite": "Fe-OH at 2.28-2.29um vs Mg-OH at 2.31-2.32um. ~20-30nm shift is diagnostic.",
+    "Fe_Mg_vs_Al_phyllosilicate": "Fe/Mg-OH at 2.28-2.32um vs Al-OH at 2.20-2.21um. ~100nm shift.",
+    "LCP_vs_HCP": "Band II position: LCP ~1.83um vs HCP ~2.15um. ~300nm shift correlates with Ca content.",
+    "olivine_vs_pyroxene": "Olivine: single broad 1um complex. Pyroxene: two distinct bands at 1.0 and 1.8-2.2um.",
+    "monohydrated_vs_polyhydrated_sulfate": "Monohydrated (kieserite): H2O shifted to 2.07-2.13um. Polyhydrated: H2O at 1.93um.",
+    "kaolinite_vs_montmorillonite": "Kaolinite: doublet at 2.16+2.21um. Montmorillonite: single band at 2.21um.",
+    "gypsum_vs_other_sulfate": "Gypsum: unique 1.75um band and 2.2um triplet. Other sulfates lack these.",
+    "serpentine_vs_saponite": "Serpentine: unique 2.11um band, weak/absent 1.9um. Saponite: no 2.11um, strong 1.9um."
+  }
+}
