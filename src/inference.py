@@ -16,12 +16,12 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import PeftModel
 
 from config import (
     BANDS, CLASS_NAME, MODEL_DIR, MINERAL_KB_PATH,
-    ABSORPTION_BANDS_PATH, BASE_MODEL, MAX_LENGTH,
+    ABSORPTION_BANDS_PATH, BASE_MODEL, USE_4BIT, MAX_LENGTH,
 )
 from spectrum_encoder import encode_spectrum_from_raw, encode_spectrum
 
@@ -50,7 +50,7 @@ def format_prompt(spectrum_text: str, question: str) -> str:
 # Model loading
 # ---------------------------------------------------------------------------
 
-def load_model(model_dir: str, base_model: str = BASE_MODEL):
+def load_model(model_dir: str, base_model: str = BASE_MODEL, use_4bit: bool = USE_4BIT):
     """Load fine-tuned model with LoRA adapter."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     use_cuda = torch.cuda.is_available()
@@ -59,12 +59,25 @@ def load_model(model_dir: str, base_model: str = BASE_MODEL):
     tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
 
     print(f"Loading base model {base_model} ...")
-    model = AutoModelForCausalLM.from_pretrained(
-        base_model,
-        torch_dtype=torch.float16 if use_cuda else torch.float32,
-        device_map="auto" if use_cuda else None,
-        trust_remote_code=True,
-    )
+    load_kwargs = {"trust_remote_code": True}
+    if use_cuda and use_4bit:
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_use_double_quant=True,
+        )
+        load_kwargs.update({
+            "quantization_config": bnb_config,
+            "device_map": "auto",
+        })
+    elif use_cuda:
+        load_kwargs.update({
+            "torch_dtype": torch.float16,
+            "device_map": "auto",
+        })
+
+    model = AutoModelForCausalLM.from_pretrained(base_model, **load_kwargs)
 
     print(f"Loading LoRA adapter from {model_dir} ...")
     model = PeftModel.from_pretrained(model, model_dir)

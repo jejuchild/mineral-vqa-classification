@@ -60,20 +60,21 @@ CLASS_NAME = {
 MAX_SAMPLES = 50000           # max spectra for QA generation
 
 # --- Training Config ---
-BASE_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+BASE_MODEL = "Qwen/Qwen2.5-7B-Instruct"
+USE_4BIT = True               # QLoRA: 4-bit quantization for T4 16GB
 LORA_R = 16
 LORA_ALPHA = 32
 LORA_DROPOUT = 0.05
 LORA_TARGET_MODULES = ["q_proj", "v_proj", "k_proj", "o_proj"]
 
 TRAIN_EPOCHS = 10
-TRAIN_BATCH_SIZE = 4
-EVAL_BATCH_SIZE = 8
-LEARNING_RATE = 2e-4
+TRAIN_BATCH_SIZE = 2          # smaller batch for 7B on T4
+EVAL_BATCH_SIZE = 4
+LEARNING_RATE = 1e-4          # slightly lower LR for larger model
 WEIGHT_DECAY = 0.01
 WARMUP_RATIO = 0.03
 MAX_LENGTH = 768              # longer for spectrum text encoding
-GRAD_ACCUM_STEPS = 8
+GRAD_ACCUM_STEPS = 16         # effective batch = 2 * 16 = 32
 
 # --- Split (observation-wise, matching existing pipeline) ---
 TRAIN_RATIO = 0.8

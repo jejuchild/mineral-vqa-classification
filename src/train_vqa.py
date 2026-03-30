@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Fine-tune Qwen2.5-1.5B-Instruct with LoRA for mineral spectral VQA.
+"""Fine-tune Qwen2.5-7B-Instruct with QLoRA (4-bit) for mineral spectral VQA.
 
 Text-only approach: spectrum is encoded as structured text, no images needed.
 Uses observation-wise split to prevent scene leakage.
+Designed for Google Colab T4 (16GB VRAM).
 """
 from __future__ import annotations
 
@@ -18,12 +19,13 @@ from tqdm import tqdm
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
+    BitsAndBytesConfig,
     get_linear_schedule_with_warmup,
 )
-from peft import LoraConfig, get_peft_model, TaskType
+from peft import LoraConfig, get_peft_model, TaskType, prepare_model_for_kbit_training
 
 from config import (
-    BASE_MODEL, LORA_R, LORA_ALPHA, LORA_DROPOUT, LORA_TARGET_MODULES,
+    BASE_MODEL, USE_4BIT, LORA_R, LORA_ALPHA, LORA_DROPOUT, LORA_TARGET_MODULES,
     TRAIN_EPOCHS, TRAIN_BATCH_SIZE, EVAL_BATCH_SIZE,
     LEARNING_RATE, WEIGHT_DECAY, WARMUP_RATIO, MAX_LENGTH,
     GRAD_ACCUM_STEPS, MODEL_DIR, VQA_DATASET_PATH,
@@ -189,12 +191,31 @@ def train(args):
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    model = AutoModelForCausalLM.from_pretrained(
-        args.model_name,
-        torch_dtype=torch.float16 if use_cuda else torch.float32,
-        device_map="auto" if use_cuda else None,
-        trust_remote_code=True,
-    )
+    # 4-bit quantization config (QLoRA) for T4 16GB
+    load_kwargs = {"trust_remote_code": True}
+    if use_cuda and args.use_4bit:
+        print("  Using 4-bit quantization (QLoRA) ...")
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_use_double_quant=True,
+        )
+        load_kwargs.update({
+            "quantization_config": bnb_config,
+            "device_map": "auto",
+        })
+    elif use_cuda:
+        load_kwargs.update({
+            "torch_dtype": torch.float16,
+            "device_map": "auto",
+        })
+
+    model = AutoModelForCausalLM.from_pretrained(args.model_name, **load_kwargs)
+
+    # prepare for k-bit training (freeze base, cast norms to fp32)
+    if use_cuda and args.use_4bit:
+        model = prepare_model_for_kbit_training(model)
 
     # apply LoRA
     print("Applying LoRA ...")
@@ -307,6 +328,8 @@ def main():
     parser.add_argument("--model-name", type=str, default=BASE_MODEL)
     parser.add_argument("--qa-path", type=str, default=str(VQA_DATASET_PATH))
     parser.add_argument("--save-dir", type=str, default=str(MODEL_DIR))
+    parser.add_argument("--use-4bit", action="store_true", default=USE_4BIT,
+                        help="Use 4-bit quantization (QLoRA) for T4 GPU")
     parser.add_argument("--lora-r", type=int, default=LORA_R)
     parser.add_argument("--lora-alpha", type=int, default=LORA_ALPHA)
     parser.add_argument("--lora-dropout", type=float, default=LORA_DROPOUT)
