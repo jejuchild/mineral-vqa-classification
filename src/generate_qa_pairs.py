@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Generate VQA question-answer pairs from spectral images + mineral KB.
+"""Generate VQA question-answer pairs with spectrum text encoding.
 
 Produces 4 types of QA pairs:
   Type A: Basic classification ("What mineral is this?")
   Type B: Absorption feature description ("Describe the absorption features")
   Type C: Differential diagnosis ("How do you distinguish this from X?")
   Type D: CRISM parameter-based ("What spectral parameters detect this?")
+
+Each QA pair includes the full spectrum text encoding for direct LLM input.
 """
 from __future__ import annotations
 
@@ -18,9 +20,11 @@ import numpy as np
 from tqdm import tqdm
 
 from config import (
-    BANDS, CLASS_NAME, GROUPS_IDX, GROUP_NAMES,
-    MINERAL_KB_PATH, ABSORPTION_BANDS_PATH,
-    SPECTRAL_IMAGES_DIR, VQA_DATASET_PATH, NPZ_PATH, SEED,
+    BANDS, CLASS_NAME, MINERAL_KB_PATH, ABSORPTION_BANDS_PATH,
+    VQA_DATASET_PATH, NPZ_PATH, SEED, MAX_SAMPLES,
+)
+from spectrum_encoder import (
+    encode_spectrum, preprocess_batch, detect_absorptions, match_cause,
 )
 
 
@@ -38,87 +42,23 @@ def load_absorption_catalog() -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Absorption band auto-detection from CR spectrum
-# ---------------------------------------------------------------------------
-
-def detect_absorptions(
-    spectrum: np.ndarray,
-    wavelengths: np.ndarray,
-    min_depth: float = 0.03,
-    window: int = 7,
-) -> list[dict]:
-    """Detect absorption features as local minima in CR spectrum.
-
-    Returns list of {wavelength, depth, band_index} sorted by depth.
-    """
-    from scipy.signal import argrelextrema
-
-    # smooth spectrum slightly
-    kernel = np.ones(window) / window
-    smoothed = np.convolve(spectrum, kernel, mode="same")
-
-    # find local minima
-    minima_idx = argrelextrema(smoothed, np.less, order=window)[0]
-
-    absorptions = []
-    for idx in minima_idx:
-        depth = 1.0 - smoothed[idx]  # depth below continuum (CR=1.0)
-        if depth >= min_depth:
-            absorptions.append({
-                "wavelength_um": float(wavelengths[idx]),
-                "depth": float(depth),
-                "band_index": int(idx),
-            })
-
-    absorptions.sort(key=lambda x: -x["depth"])
-    return absorptions
-
-
-def match_absorption_to_cause(
-    wl: float,
-    absorption_catalog: dict,
-    tolerance: float = 0.04,
-) -> str | None:
-    """Match a detected absorption wavelength to known molecular cause."""
-    vibs = absorption_catalog.get("molecular_vibrations", {})
-    best_match = None
-    best_dist = tolerance
-
-    for name, info in vibs.items():
-        wl_range = info.get("wavelength_range", [])
-        if len(wl_range) == 2:
-            if wl_range[0] - tolerance <= wl <= wl_range[1] + tolerance:
-                center = info.get("typical_center", sum(wl_range) / 2)
-                dist = abs(wl - center)
-                if dist < best_dist:
-                    best_dist = dist
-                    best_match = {
-                        "feature_name": name,
-                        "cause": info.get("cause", "Unknown"),
-                        "typical_center": center,
-                        "minerals": info.get("minerals", []),
-                    }
-    return best_match
-
-
-# ---------------------------------------------------------------------------
 # QA pair generators
 # ---------------------------------------------------------------------------
 
-def generate_type_a(image_name: str, mineral: str, kb_entry: dict) -> list[dict]:
+def generate_type_a(spectrum_text: str, mineral: str, kb_entry: dict) -> list[dict]:
     """Type A: Basic classification questions."""
     group = kb_entry.get("group", "Unknown")
     subgroup = kb_entry.get("subgroup", "Unknown")
 
     questions = [
         {
-            "image": image_name,
+            "spectrum": spectrum_text,
             "question": "What mineral is this?",
             "answer": mineral,
             "type": "A",
         },
         {
-            "image": image_name,
+            "spectrum": spectrum_text,
             "question": "What mineral group does this belong to?",
             "answer": f"{group}, {subgroup} subgroup",
             "type": "A",
@@ -128,7 +68,7 @@ def generate_type_a(image_name: str, mineral: str, kb_entry: dict) -> list[dict]
     formula = kb_entry.get("formula")
     if formula:
         questions.append({
-            "image": image_name,
+            "spectrum": spectrum_text,
             "question": "What is the chemical formula of this mineral?",
             "answer": formula,
             "type": "A",
@@ -137,7 +77,7 @@ def generate_type_a(image_name: str, mineral: str, kb_entry: dict) -> list[dict]
     mars_ctx = kb_entry.get("mars_context")
     if mars_ctx:
         questions.append({
-            "image": image_name,
+            "spectrum": spectrum_text,
             "question": "Where on Mars is this mineral typically found?",
             "answer": mars_ctx,
             "type": "A",
@@ -147,48 +87,42 @@ def generate_type_a(image_name: str, mineral: str, kb_entry: dict) -> list[dict]
 
 
 def generate_type_b(
-    image_name: str,
+    spectrum_text: str,
     mineral: str,
     kb_entry: dict,
     detected_absorptions: list[dict],
-    absorption_catalog: dict,
 ) -> list[dict]:
     """Type B: Absorption feature description."""
     questions = []
 
-    # describe detected features
     if detected_absorptions:
         feature_strs = []
-        for ab in detected_absorptions[:5]:  # top 5 deepest
-            wl = ab["wavelength_um"]
+        for ab in detected_absorptions[:5]:
+            wl = ab["wavelength"]
             depth = ab["depth"]
-            match = match_absorption_to_cause(wl, absorption_catalog)
-            if match:
-                feature_strs.append(
-                    f"{wl:.2f}um (depth={depth:.2f}, {match['cause']})"
-                )
+            cause = match_cause(wl)
+            if cause:
+                feature_strs.append(f"{wl:.2f}um (depth={depth:.3f}, {cause})")
             else:
-                feature_strs.append(f"{wl:.2f}um (depth={depth:.2f})")
+                feature_strs.append(f"{wl:.2f}um (depth={depth:.3f})")
 
         answer = f"Absorption features detected: {'; '.join(feature_strs)}."
         questions.append({
-            "image": image_name,
+            "spectrum": spectrum_text,
             "question": "What absorption features are present in this spectrum?",
             "answer": answer,
             "type": "B",
         })
 
-    # spectral description from KB
     desc = kb_entry.get("spectral_description")
     if desc:
         questions.append({
-            "image": image_name,
+            "spectrum": spectrum_text,
             "question": "Describe the spectral characteristics of this mineral.",
             "answer": desc,
             "type": "B",
         })
 
-    # band assignments
     band_assigns = kb_entry.get("band_assignments", {})
     if band_assigns:
         diag_bands = kb_entry.get("diagnostic_bands_um", [])
@@ -200,7 +134,7 @@ def generate_type_b(
                 f"Assignments: {'; '.join(assign_strs)}."
             )
             questions.append({
-                "image": image_name,
+                "spectrum": spectrum_text,
                 "question": f"What are the diagnostic absorption bands for {mineral}?",
                 "answer": answer,
                 "type": "B",
@@ -209,18 +143,14 @@ def generate_type_b(
     return questions
 
 
-def generate_type_c(
-    image_name: str,
-    mineral: str,
-    kb_entry: dict,
-) -> list[dict]:
+def generate_type_c(spectrum_text: str, mineral: str, kb_entry: dict) -> list[dict]:
     """Type C: Differential diagnosis."""
     questions = []
     distinctions = kb_entry.get("distinguish_from", {})
 
     for other_mineral, explanation in distinctions.items():
         questions.append({
-            "image": image_name,
+            "spectrum": spectrum_text,
             "question": f"How do you distinguish this from {other_mineral}?",
             "answer": explanation,
             "type": "C",
@@ -230,7 +160,7 @@ def generate_type_c(
 
 
 def generate_type_d(
-    image_name: str,
+    spectrum_text: str,
     mineral: str,
     kb_entry: dict,
     absorption_catalog: dict,
@@ -246,35 +176,29 @@ def generate_type_d(
     for p in params:
         info = param_details.get(p, {})
         if info:
-            param_strs.append(
-                f"{p} ({info.get('detects', 'mineral detection')})"
-            )
+            param_strs.append(f"{p} ({info.get('detects', 'mineral detection')})")
         else:
             param_strs.append(p)
 
     answer = f"CRISM spectral parameters for {mineral}: {'; '.join(param_strs)}."
     questions.append({
-        "image": image_name,
+        "spectrum": spectrum_text,
         "question": "What CRISM spectral parameters would detect this mineral?",
         "answer": answer,
         "type": "D",
     })
 
-    # add decision rule question if applicable
     rules = absorption_catalog.get("decision_rules", {})
     group = kb_entry.get("group", "")
-    relevant_rules = []
     for rule_name, rule_text in rules.items():
         if mineral.lower() in rule_text.lower() or group.lower() in rule_name.lower():
-            relevant_rules.append(rule_text)
-
-    if relevant_rules:
-        questions.append({
-            "image": image_name,
-            "question": f"What spectral decision rule applies to classifying {mineral}?",
-            "answer": relevant_rules[0],
-            "type": "D",
-        })
+            questions.append({
+                "spectrum": spectrum_text,
+                "question": f"What spectral decision rule applies to classifying {mineral}?",
+                "answer": rule_text,
+                "type": "D",
+            })
+            break
 
     return questions
 
@@ -284,11 +208,10 @@ def generate_type_d(
 # ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate VQA QA pairs")
-    parser.add_argument("--manifest", type=str,
-                        default=str(SPECTRAL_IMAGES_DIR / "manifest.json"))
+    parser = argparse.ArgumentParser(description="Generate text-based VQA QA pairs")
     parser.add_argument("--npz", type=str, default=str(NPZ_PATH))
     parser.add_argument("--out", type=str, default=str(VQA_DATASET_PATH))
+    parser.add_argument("--max-samples", type=int, default=MAX_SAMPLES)
     parser.add_argument("--seed", type=int, default=SEED)
     args = parser.parse_args()
 
@@ -300,52 +223,73 @@ def main():
     kb = load_kb()
     absorption_catalog = load_absorption_catalog()
 
-    print("Loading manifest ...")
-    with open(args.manifest) as f:
-        manifest = json.load(f)
-
-    print(f"Loading spectra from {args.npz} for absorption detection ...")
+    print(f"Loading spectra from {args.npz} ...")
     data = np.load(args.npz, allow_pickle=True)
     X_raw = data["X"].astype(np.float32)
+    y = data["y"]
+    obs_idx = data["obs_idx"]
+    n_total = len(X_raw)
 
-    # preprocess for absorption detection (reuse from generate_spectral_images)
-    from generate_spectral_images import preprocess
+    print(f"  Total pixels: {n_total}")
+    print(f"  Classes: {np.unique(y)}")
 
+    # stratified subsample
+    rng = np.random.RandomState(args.seed)
+    if n_total > args.max_samples:
+        indices = []
+        for cls in np.unique(y):
+            cls_idx = np.where(y == cls)[0]
+            n_cls = max(1, int(args.max_samples * len(cls_idx) / n_total))
+            chosen = rng.choice(cls_idx, size=min(n_cls, len(cls_idx)), replace=False)
+            indices.append(chosen)
+        indices = np.concatenate(indices)
+        rng.shuffle(indices)
+        indices = indices[:args.max_samples]
+    else:
+        indices = np.arange(n_total)
+
+    print(f"  Selected: {len(indices)} spectra")
+
+    # preprocess
+    print("Preprocessing (fill interp + CR) ...")
+    X_sel = preprocess_batch(X_raw[indices])
+    y_sel = y[indices]
+    obs_sel = obs_idx[indices]
+
+    # generate QA pairs
+    print("Generating QA pairs ...")
     all_qa = []
     skipped = 0
 
-    for entry in tqdm(manifest, desc="Generating QA pairs"):
-        image_name = entry["image"]
-        label = entry["label"]
-        mineral = entry["mineral"]
+    for i in tqdm(range(len(X_sel)), desc="Generating QA pairs"):
+        label = int(y_sel[i])
+        mineral = CLASS_NAME.get(label)
+        if mineral is None:
+            skipped += 1
+            continue
 
-        # find KB entry
         kb_entry = kb.get(mineral)
         if kb_entry is None:
             skipped += 1
             continue
 
-        # detect absorptions from the actual spectrum using original npz index
-        npz_idx = entry.get("npz_index", entry.get("index", 0))
-        if npz_idx < len(X_raw):
-            spec_raw = X_raw[npz_idx:npz_idx+1]
-            spec_cr = preprocess(spec_raw)[0]
-            detected = detect_absorptions(spec_cr, BANDS)
-        else:
-            detected = []
+        spectrum_cr = X_sel[i]
+        spectrum_text = encode_spectrum(spectrum_cr)
+        detected = detect_absorptions(spectrum_cr)
 
-        # generate all QA types
-        qa_a = generate_type_a(image_name, mineral, kb_entry)
-        qa_b = generate_type_b(image_name, mineral, kb_entry, detected, absorption_catalog)
-        qa_c = generate_type_c(image_name, mineral, kb_entry)
-        qa_d = generate_type_d(image_name, mineral, kb_entry, absorption_catalog)
+        qa_a = generate_type_a(spectrum_text, mineral, kb_entry)
+        qa_b = generate_type_b(spectrum_text, mineral, kb_entry, detected)
+        qa_c = generate_type_c(spectrum_text, mineral, kb_entry)
+        qa_d = generate_type_d(spectrum_text, mineral, kb_entry, absorption_catalog)
 
-        all_qa.extend(qa_a + qa_b + qa_c + qa_d)
+        for qa in qa_a + qa_b + qa_c + qa_d:
+            qa["obs_idx"] = int(obs_sel[i])
+            qa["label"] = label
+            all_qa.append(qa)
 
     print(f"Total QA pairs: {len(all_qa)}")
-    print(f"Skipped (no KB entry): {skipped}")
+    print(f"Skipped (no KB): {skipped}")
 
-    # type distribution
     type_counts = {}
     for qa in all_qa:
         t = qa["type"]

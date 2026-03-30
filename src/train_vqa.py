@@ -1,25 +1,23 @@
 #!/usr/bin/env python3
-"""Fine-tune BLIP-2 with LoRA for mineral spectral VQA.
+"""Fine-tune Qwen2.5-1.5B-Instruct with LoRA for mineral spectral VQA.
 
-Uses spectral plot images + QA pairs from the generation pipeline.
-Trains only the Q-Former via LoRA for efficient fine-tuning.
+Text-only approach: spectrum is encoded as structured text, no images needed.
+Uses observation-wise split to prevent scene leakage.
 """
 from __future__ import annotations
 
 import argparse
 import json
-import os
 import random
 from pathlib import Path
 
 import numpy as np
 import torch
-from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from transformers import (
-    Blip2ForConditionalGeneration,
-    Blip2Processor,
+    AutoModelForCausalLM,
+    AutoTokenizer,
     get_linear_schedule_with_warmup,
 )
 from peft import LoraConfig, get_peft_model, TaskType
@@ -28,28 +26,56 @@ from config import (
     BASE_MODEL, LORA_R, LORA_ALPHA, LORA_DROPOUT, LORA_TARGET_MODULES,
     TRAIN_EPOCHS, TRAIN_BATCH_SIZE, EVAL_BATCH_SIZE,
     LEARNING_RATE, WEIGHT_DECAY, WARMUP_RATIO, MAX_LENGTH,
-    GRAD_ACCUM_STEPS, MODEL_DIR, SPECTRAL_IMAGES_DIR, VQA_DATASET_PATH,
+    GRAD_ACCUM_STEPS, MODEL_DIR, VQA_DATASET_PATH,
     SEED, TRAIN_RATIO, VAL_RATIO, NPZ_PATH,
 )
+
+
+# ---------------------------------------------------------------------------
+# Prompt formatting
+# ---------------------------------------------------------------------------
+
+SYSTEM_PROMPT = (
+    "You are a Mars mineral spectroscopy expert. "
+    "Given a CRISM spectrum (continuum-removed, 1.02-3.92um), "
+    "answer questions about mineral identification, absorption features, "
+    "and spectral characteristics."
+)
+
+
+def format_prompt(spectrum_text: str, question: str) -> str:
+    """Format input as chat template."""
+    return (
+        f"<|im_start|>system\n{SYSTEM_PROMPT}<|im_end|>\n"
+        f"<|im_start|>user\n{spectrum_text}\n\n{question}<|im_end|>\n"
+        f"<|im_start|>assistant\n"
+    )
+
+
+def format_prompt_with_answer(spectrum_text: str, question: str, answer: str) -> str:
+    """Format full training example."""
+    return (
+        f"<|im_start|>system\n{SYSTEM_PROMPT}<|im_end|>\n"
+        f"<|im_start|>user\n{spectrum_text}\n\n{question}<|im_end|>\n"
+        f"<|im_start|>assistant\n{answer}<|im_end|>"
+    )
 
 
 # ---------------------------------------------------------------------------
 # Dataset
 # ---------------------------------------------------------------------------
 
-class MineralVQADataset(Dataset):
-    """Dataset for mineral spectral VQA."""
+class MineralQADataset(Dataset):
+    """Dataset for mineral spectral QA (text-only)."""
 
     def __init__(
         self,
         qa_pairs: list[dict],
-        image_dir: Path,
-        processor: Blip2Processor,
+        tokenizer,
         max_length: int = MAX_LENGTH,
     ):
         self.qa_pairs = qa_pairs
-        self.image_dir = image_dir
-        self.processor = processor
+        self.tokenizer = tokenizer
         self.max_length = max_length
 
     def __len__(self):
@@ -57,39 +83,41 @@ class MineralVQADataset(Dataset):
 
     def __getitem__(self, idx):
         qa = self.qa_pairs[idx]
-        image_path = self.image_dir / qa["image"]
-        image = Image.open(image_path).convert("RGB")
+        full_text = format_prompt_with_answer(
+            qa["spectrum"], qa["question"], qa["answer"],
+        )
 
-        question = qa["question"]
-        answer = qa["answer"]
-
-        # process image + question
-        encoding = self.processor(
-            images=image,
-            text=question,
-            padding="max_length",
+        encoding = self.tokenizer(
+            full_text,
             truncation=True,
             max_length=self.max_length,
+            padding="max_length",
             return_tensors="pt",
         )
 
-        # process answer as labels
-        labels = self.processor.tokenizer(
-            answer,
-            padding="max_length",
-            truncation=True,
-            max_length=self.max_length,
-            return_tensors="pt",
+        input_ids = encoding["input_ids"].squeeze(0)
+        attention_mask = encoding["attention_mask"].squeeze(0)
+
+        # create labels: mask everything before "assistant\n"
+        labels = input_ids.clone()
+
+        # find the start of the answer
+        prompt_text = format_prompt(qa["spectrum"], qa["question"])
+        prompt_tokens = self.tokenizer(
+            prompt_text, truncation=True, max_length=self.max_length,
         )
+        prompt_len = len(prompt_tokens["input_ids"])
 
-        # squeeze batch dim
-        item = {k: v.squeeze(0) for k, v in encoding.items()}
-        item["labels"] = labels["input_ids"].squeeze(0)
+        # mask prompt tokens in labels (only train on answer)
+        labels[:prompt_len] = -100
+        # mask padding
+        labels[attention_mask == 0] = -100
 
-        # mask padding in labels
-        item["labels"][item["labels"] == self.processor.tokenizer.pad_token_id] = -100
-
-        return item
+        return {
+            "input_ids": input_ids,
+            "attention_mask": attention_mask,
+            "labels": labels,
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -98,29 +126,14 @@ class MineralVQADataset(Dataset):
 
 def split_qa_obs_wise(
     qa_pairs: list[dict],
-    manifest_path: Path,
-    npz_path: Path,
     seed: int = SEED,
 ) -> tuple[list, list, list]:
     """Split QA pairs by observation to prevent scene leakage."""
-    # load manifest to get obs_idx per image
-    with open(manifest_path) as f:
-        manifest = json.load(f)
-
-    image_to_obs = {m["image"]: m["obs_idx"] for m in manifest}
-
-    # load npz to get obs_ids
-    data = np.load(npz_path, allow_pickle=True)
-    obs_ids = data.get("obs_ids", np.arange(100))
-    n_obs = len(np.unique(list(image_to_obs.values())))
-
-    # group QA pairs by observation
     obs_to_qa = {}
     for qa in qa_pairs:
-        obs = image_to_obs.get(qa["image"], -1)
+        obs = qa.get("obs_idx", -1)
         obs_to_qa.setdefault(obs, []).append(qa)
 
-    # shuffle and split observations
     obs_list = sorted(obs_to_qa.keys())
     rng = random.Random(seed)
     rng.shuffle(obs_list)
@@ -147,8 +160,8 @@ def split_qa_obs_wise(
 # ---------------------------------------------------------------------------
 
 def train(args):
-    use_auto_device = torch.cuda.is_available()
-    device = torch.device("cuda" if use_auto_device else "cpu")
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda" if use_cuda else "cpu")
     print(f"Device: {device}")
 
     # load QA pairs
@@ -159,25 +172,28 @@ def train(args):
 
     # split
     print("Splitting by observation ...")
-    manifest_path = Path(args.image_dir) / "manifest.json"
-    train_qa, val_qa, test_qa = split_qa_obs_wise(
-        all_qa, manifest_path, Path(args.npz), args.seed,
-    )
+    train_qa, val_qa, test_qa = split_qa_obs_wise(all_qa, args.seed)
     print(f"  Train: {len(train_qa)}, Val: {len(val_qa)}, Test: {len(test_qa)}")
 
-    # save test set for later evaluation
+    # save test set
     test_path = Path(args.qa_path).parent / "vqa_test_set.json"
     with open(test_path, "w") as f:
         json.dump(test_qa, f, indent=2, ensure_ascii=False)
     print(f"  Test set saved to {test_path}")
 
-    # load model + processor
+    # load model + tokenizer
     print(f"Loading {args.model_name} ...")
-    processor = Blip2Processor.from_pretrained(args.model_name)
-    model = Blip2ForConditionalGeneration.from_pretrained(
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.model_name, trust_remote_code=True,
+    )
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    model = AutoModelForCausalLM.from_pretrained(
         args.model_name,
-        torch_dtype=torch.float16,
-        device_map="auto" if use_auto_device else None,
+        torch_dtype=torch.float16 if use_cuda else torch.float32,
+        device_map="auto" if use_cuda else None,
+        trust_remote_code=True,
     )
 
     # apply LoRA
@@ -193,23 +209,20 @@ def train(args):
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
 
-    # when using device_map="auto", tensors are already placed correctly
-    # only manually move to device when not using auto mapping
-    if not use_auto_device:
+    if not use_cuda:
         model = model.to(device)
 
     # datasets
-    image_dir = Path(args.image_dir)
-    train_ds = MineralVQADataset(train_qa, image_dir, processor, args.max_length)
-    val_ds = MineralVQADataset(val_qa, image_dir, processor, args.max_length)
+    train_ds = MineralQADataset(train_qa, tokenizer, args.max_length)
+    val_ds = MineralQADataset(val_qa, tokenizer, args.max_length)
 
     train_loader = DataLoader(
         train_ds, batch_size=args.batch_size, shuffle=True,
-        num_workers=2, pin_memory=True,
+        num_workers=0, pin_memory=use_cuda,
     )
     val_loader = DataLoader(
         val_ds, batch_size=args.eval_batch_size, shuffle=False,
-        num_workers=2, pin_memory=True,
+        num_workers=0, pin_memory=use_cuda,
     )
 
     # optimizer
@@ -219,7 +232,7 @@ def train(args):
     total_steps = len(train_loader) * args.epochs // args.grad_accum
     warmup_steps = int(total_steps * args.warmup_ratio)
     scheduler = get_linear_schedule_with_warmup(
-        optimizer, warmup_steps, total_steps,
+        optimizer, warmup_steps, max(total_steps, 1),
     )
 
     # training loop
@@ -234,10 +247,8 @@ def train(args):
 
         pbar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{args.epochs}")
         for step, batch in enumerate(pbar):
-            # with device_map="auto", move to the model's first device
             target_device = next(model.parameters()).device
-            batch = {k: v.to(target_device) if isinstance(v, torch.Tensor) else v
-                     for k, v in batch.items()}
+            batch = {k: v.to(target_device) for k, v in batch.items()}
 
             outputs = model(**batch)
             loss = outputs.loss / args.grad_accum
@@ -252,6 +263,13 @@ def train(args):
             train_loss += outputs.loss.item()
             pbar.set_postfix({"loss": f"{outputs.loss.item():.4f}"})
 
+        # handle remaining gradient accumulation
+        if (step + 1) % args.grad_accum != 0:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            optimizer.step()
+            scheduler.step()
+            optimizer.zero_grad()
+
         avg_train_loss = train_loss / len(train_loader)
 
         # validation
@@ -260,8 +278,7 @@ def train(args):
         with torch.no_grad():
             for batch in tqdm(val_loader, desc="Validation"):
                 target_device = next(model.parameters()).device
-                batch = {k: v.to(target_device) if isinstance(v, torch.Tensor) else v
-                         for k, v in batch.items()}
+                batch = {k: v.to(target_device) for k, v in batch.items()}
                 outputs = model(**batch)
                 val_loss += outputs.loss.item()
 
@@ -273,25 +290,22 @@ def train(args):
             f"val_loss={avg_val_loss:.4f}"
         )
 
-        # save best
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
             model.save_pretrained(save_dir / "best")
-            processor.save_pretrained(save_dir / "best")
+            tokenizer.save_pretrained(save_dir / "best")
             print(f"  -> Saved best model (val_loss={best_val_loss:.4f})")
 
     # save final
     model.save_pretrained(save_dir / "final")
-    processor.save_pretrained(save_dir / "final")
+    tokenizer.save_pretrained(save_dir / "final")
     print(f"Training complete. Models saved to {save_dir}")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train VQA model for mineral classification")
+    parser = argparse.ArgumentParser(description="Train spectral QA model")
     parser.add_argument("--model-name", type=str, default=BASE_MODEL)
     parser.add_argument("--qa-path", type=str, default=str(VQA_DATASET_PATH))
-    parser.add_argument("--image-dir", type=str, default=str(SPECTRAL_IMAGES_DIR))
-    parser.add_argument("--npz", type=str, default=str(NPZ_PATH))
     parser.add_argument("--save-dir", type=str, default=str(MODEL_DIR))
     parser.add_argument("--lora-r", type=int, default=LORA_R)
     parser.add_argument("--lora-alpha", type=int, default=LORA_ALPHA)

@@ -56,17 +56,15 @@ CLASS_NAME = {
     38: "Olivine (Fo-rich)", 100: "Water-unrelated",
 }
 
-# --- VQA Config ---
-MAX_SAMPLES = 50000           # max spectra to convert to images
-IMAGE_SIZE = (384, 384)       # BLIP-2 input size
-IMAGE_DPI = 100
+# --- Data Config ---
+MAX_SAMPLES = 50000           # max spectra for QA generation
 
 # --- Training Config ---
-BASE_MODEL = "Salesforce/blip2-opt-2.7b"
+BASE_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
 LORA_R = 16
 LORA_ALPHA = 32
 LORA_DROPOUT = 0.05
-LORA_TARGET_MODULES = ["q_proj", "v_proj"]
+LORA_TARGET_MODULES = ["q_proj", "v_proj", "k_proj", "o_proj"]
 
 TRAIN_EPOCHS = 10
 TRAIN_BATCH_SIZE = 4
@@ -74,7 +72,7 @@ EVAL_BATCH_SIZE = 8
 LEARNING_RATE = 2e-4
 WEIGHT_DECAY = 0.01
 WARMUP_RATIO = 0.03
-MAX_LENGTH = 128
+MAX_LENGTH = 768              # longer for spectrum text encoding
 GRAD_ACCUM_STEPS = 8
 
 # --- Split (observation-wise, matching existing pipeline) ---
